@@ -25,6 +25,59 @@ STATUS_ORCAMENTO_ESCOLHAS = (
 
 STATUS_PEDIDO_VENDA_ESCOLHAS = (
     (u'0', u'Aberto'),
+    (u'1', u'Realizado'),
+    (u'2', u'Cancelado'),
+)
+
+TIPOS_DESCONTO_ESCOLHAS = (
+    (u'0', u'Percentual'),
+    (u'1', u'Valor'),
+)
+
+TIPOS_ESCOLHAS = (
+    (u'0', u'Orçamento'),
+    (u'1', u'Pedido'),
+)
+
+MOD_FRETE_ESCOLHAS = (
+    (u'0', u'Por conta do emitente'),
+    (u'1', u'Por conta do destinatário'),
+    (u'2', u'Por conta de terceiros'),
+    (u'9', u'Sem frete'),
+)
+
+
+class ItensVenda(models.Model):
+
+    def format_valor_unit(self):
+        return format_decimal(self.valor_unit)
+
+    def format_subtotal(self):
+        return format_decimal(self.subtotal)
+
+    def format_vprod(self):
+        return format_decimal(self.vprod)jango.urls import reverse_lazy
+
+from decimal import Decimal
+
+from djangosige.apps.fiscal.models import PIS, COFINS
+from djangosige.apps.estoque.models import DEFAULT_LOCAL_ID
+from djangosige.apps.base.utils import format_decimal
+
+import locale
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    pass
+
+STATUS_ORCAMENTO_ESCOLHAS = (
+    (u'0', u'Aberto'),
+    (u'1', u'Baixado'),
+    (u'2', u'Cancelado'),
+)
+
+STATUS_PEDIDO_VENDA_ESCOLHAS = (
+    (u'0', u'Aberto'),
     (u'1', u'Faturado'),
     (u'2', u'Cancelado'),
     (u'3', u'Importado por XML'),
@@ -149,16 +202,16 @@ class ItensVenda(models.Model):
         return '{0}'.format(locale.format(u'%.2f', self.get_valor_desconto(), 1))
 
     def format_quantidade(self):
-        return format_decimal(self.quantidade)
+        return locale.format(u'%.2f', self.quantidade, 1)
 
     def format_valor_unit(self):
-        return format_decimal(self.valor_unit)
+        return locale.format(u'%.2f', self.valor_unit, 1)
 
     def format_total(self):
-        return format_decimal(self.subtotal)
+        return locale.format(u'%.2f', self.subtotal, 1)
 
     def format_vprod(self):
-        return format_decimal(self.vprod)
+        return locale.format(u'%.2f', self.vprod, 1)
 
     def get_total_sem_desconto(self):
         if self.tipo_desconto == '0':
@@ -181,14 +234,14 @@ class ItensVenda(models.Model):
         return sum(filter(None, [self.vicms, self.vicms_st, self.vipi, self.vfcp, self.vicmsufdest, self.vicmsufremet]))
 
     def format_total_impostos(self):
-        return locale.format(u'%.2f', self.get_total_impostos(), 1)
+        return format_decimal(self.get_total_impostos())
 
     def get_total_com_impostos(self):
         total_com_impostos = self.subtotal + self.get_total_impostos()
         return total_com_impostos
 
     def format_total_com_imposto(self):
-        return locale.format(u'%.2f', self.get_total_com_impostos(), 1)
+        return format_decimal(self.get_total_com_impostos())
 
     def format_valor_attr(self, nome_attr):
         valor = getattr(self, nome_attr)
@@ -325,7 +378,7 @@ class Venda(models.Model):
         return tot
 
     def format_total_produtos(self):
-        return locale.format(u'%.2f', self.get_total_produtos(), 1)
+        return format_decimal(self.get_total_produtos())
 
     @property
     def format_data_emissao(self):
@@ -349,7 +402,7 @@ class Venda(models.Model):
         return format_decimal(self.impostos)
 
     def format_total_sem_imposto(self):
-        return locale.format(u'%.2f', self.get_total_sem_imposto(), 1)
+        return format_decimal(self.get_total_sem_imposto())
 
     def format_desconto(self):
         if self.tipo_desconto == '0':

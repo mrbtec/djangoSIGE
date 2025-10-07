@@ -8,11 +8,15 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.urls import reverse_lazy
 from django.template.defaultfilters import date
+from djangosige.apps.base.utils import format_decimal
 
 from . import DEFAULT_LOCAL_ID
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    pass
 
 TIPOS_MOVIMENTO_ENTRADA = (
     (u'0', u'Ajuste'),
@@ -50,7 +54,7 @@ class ItensMovimento(models.Model):
     def format_estoque_atual_produto(self):
         estoque_atual = self.get_estoque_atual_produto()
         if isinstance(estoque_atual, Decimal):
-            return locale.format(u'%.2f', estoque_atual, 1)
+            return format_decimal(estoque_atual)
         else:
             return estoque_atual
 
@@ -74,10 +78,10 @@ class MovimentoEstoque(models.Model):
         return '%s' % date(self.data_movimento, "d/m/Y")
 
     def format_quantidade_itens(self):
-        return locale.format(u'%.2f', self.quantidade_itens, 1)
+        return format_decimal(self.quantidade_itens)
 
     def format_valor_total(self):
-        return locale.format(u'%.2f', self.valor_total, 1)
+        return format_decimal(self.valor_total)
 
 
 @receiver(

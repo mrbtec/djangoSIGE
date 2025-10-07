@@ -3,9 +3,13 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from djangosige.apps.base.utils import format_decimal
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    pass
 
 # Tabela diferente das vendas.
 
@@ -20,7 +24,7 @@ class Pagamento(models.Model):
 
     @property
     def format_valor_parcela(self):
-        return locale.format(u'%.2f', self.valor_parcela, 1)
+        return format_decimal(self.valor_parcela)
 
     @property
     def format_vencimento(self):

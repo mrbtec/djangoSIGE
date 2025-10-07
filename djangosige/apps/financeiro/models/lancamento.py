@@ -5,9 +5,13 @@ from django.core.validators import MinValueValidator
 from decimal import Decimal
 from django.urls import reverse_lazy
 from django.template.defaultfilters import date
+from djangosige.apps.base.utils import format_decimal
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    pass
 
 STATUS_CONTA_SAIDA_ESCOLHAS = (
     (u'0', u'Paga'),
@@ -44,7 +48,7 @@ class Lancamento(models.Model):
         verbose_name = "Lançamento"
 
     def format_valor_liquido(self):
-        return locale.format(u'%.2f', self.valor_liquido, 1)
+        return format_decimal(self.valor_liquido)
 
     @property
     def format_data_vencimento(self):
